@@ -12,6 +12,7 @@ async function handle(req: Request) {
       if (!req.headers.get('content-type')?.includes('application/json')) return Response.json({ error: 'JSON 형식이 필요합니다.' }, { status: 415, headers });
       if ((await req.clone().text()).length > 5000) return Response.json({ error: '입력이 너무 깁니다.' }, { status: 413, headers });
     }
+    const signupPayload = path === '/sign-up/email' ? await req.clone().json() as {email?:unknown} : null;
     const previous = path === '/change-password' ? await accountSession(req) : null;
     const res = await getAuth().handler(req);
     const cookies = res.headers.getSetCookie();
@@ -20,6 +21,17 @@ async function handle(req: Request) {
       const status = res.status === 429 ? 429 : path === '/sign-in/email' ? 401 : path === '/sign-up/email' && res.status < 500 ? 400 : res.status;
       const message = status === 429 ? '요청이 많습니다. 잠시 후 다시 시도해 주세요.' : path === '/sign-in/email' ? '이메일 또는 비밀번호를 확인해 주세요.' : path === '/sign-up/email' ? '가입하지 못했습니다. 이메일 중복과 입력 형식을 확인해 주세요.' : '요청을 처리하지 못했습니다. 입력값을 확인해 주세요.';
       return Response.json({ error: message }, { status, headers });
+    }
+    if (path === '/sign-up/email') {
+      // Better Auth returns a synthetic user for duplicate signup when autoSignIn is false.
+      // Preserve its validation and rate limits, then distinguish the returned ID from the stored account.
+      const result = await res.clone().json() as { user?: { id?: string } };
+      const email = typeof signupPayload?.email === 'string' ? signupPayload.email.trim().toLowerCase() : '';
+      const stored = await env.DB!.prepare('SELECT id FROM auth_users WHERE email=?').bind(email).first<{ id: string }>();
+      if (stored && result.user?.id && stored.id !== result.user.id) {
+        return Response.json({ error: '이미 사용 중인 이메일입니다. 다른 이메일을 입력하거나 로그인해 주세요.', code: 'EMAIL_ALREADY_EXISTS' }, { status: 409, headers });
+      }
+      if (!stored || !result.user?.id) return Response.json({ error: '가입 결과를 확인하지 못했습니다. 잠시 후 로그인 화면에서 확인해 주세요.' }, { status: 503, headers });
     }
     if (previous && path === '/change-password') await env.DB!.prepare('DELETE FROM auth_sessions WHERE user_id=?').bind(previous.user.id).run();
     if (path === '/get-session') {
