@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { readAuthResponse } from '@/lib/auth-response';
 import { Leaf, LockKeyhole, ArrowRight } from 'lucide-react';
 export default function Login() {
   const [signup, setSignup] = useState(false), [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('');
@@ -10,9 +11,8 @@ export default function Login() {
     if (signup && password !== f.get('confirm')) { setError('비밀번호 확인이 일치하지 않습니다.'); return; }
     setBusy(true); setError(''); setNotice('');
     try {
-      const r = await fetch(signup ? '/api/auth/sign-up/email' : '/api/auth/sign-in/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: String(f.get('email')).trim().toLowerCase(), password, ...(signup ? { name: String(f.get('name')).trim() } : {}) }) });
-      const d = await r.json() as { error?: string };
-      if (!r.ok) throw new Error(d.error ?? '요청을 처리하지 못했습니다.');
+      const r = await fetch(signup ? '/api/auth/sign-up/email' : '/api/auth/sign-in/email', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ email: String(f.get('email')).trim().toLowerCase(), password, ...(signup ? { name: String(f.get('name')).trim() } : {}) }) });
+      await readAuthResponse(r);
       form.reset();
       if (signup) { setSignup(false); setNotice('가입 요청을 처리했습니다. 이미 가입한 이메일이면 기존 비밀번호로 로그인해 주세요.'); }
       else window.location.replace('/diary');

@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import ts from 'typescript';
+const { outputText } = ts.transpileModule(readFileSync('lib/auth-response.ts','utf8'), {compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}});
+const { readAuthResponse } = await import('data:text/javascript;base64,' + Buffer.from(outputText).toString('base64'));
+await readAuthResponse(Response.json({ok:true}));
+await assert.rejects(readAuthResponse(new Response('<!DOCTYPE html><title>Login</title>',{headers:{'content-type':'text/html'}})),/HTTP 200/);
+await assert.rejects(readAuthResponse(new Response('<html>Unavailable</html>',{status:502,headers:{'content-type':'text/html'}})),/HTTP 502/);
+await assert.rejects(readAuthResponse(Response.json({error:'이메일 또는 비밀번호를 확인해 주세요.'},{status:401})),/이메일 또는 비밀번호/);
+await assert.rejects(readAuthResponse(Response.json({user:{}})),/인증 결과/);
+await assert.rejects(readAuthResponse(new Response('{',{headers:{'content-type':'application/json'}})),/서버 응답/);
+console.log('6 authentication response checks passed.');

@@ -63,3 +63,11 @@ T06 결과: https://byungkwan-pds-diary.quannie70.chatgpt.site
 5. 로그아웃 뒤 /diary를 직접 열어 로그인 화면으로 돌아오는지 확인한다.
 
 위 확인이 끝나야 C94~C100의 운영 사용자 증거를 완성한다. 아직 5일 실제 사용을 시작했다고 기록하지 않는다.
+
+### 2026-10-16 브라우저 가입 응답 오류 조사
+
+- 사용자 화면에 `Unexpected token '<'`가 표시됨: 클라이언트가 JSON 대신 HTML 응답을 받음.
+- 운영 Worker 로그의 가입 POST는 200이며 같은 시각 계정 행이 생성됨. 계정이 없어서 발생한 오류로 판단하지 않음. 제출 기록에는 이메일·비밀번호·쿠키를 옮기지 않음.
+- 배포된 Worker 산출물을 Miniflare와 격리된 D1에서 직접 실행했을 때 같은 가입 경로는 200, `application/json`, `{ok:true}`. 운영 브라우저가 HTML을 받은 지점은 아직 확정하지 못함.
+- 클라이언트는 `Accept: application/json`을 명시하고, 응답의 형식과 `{ok:true}`를 확인한 뒤 성공 처리. HTML/잘못된 JSON은 안내 문구로 표시하며 원본 HTML을 화면이나 로그에 출력하지 않음.
+- `node tests/auth-response.mjs`: 정상 응답·HTML 200/502·401·잘못된 성공 본문·깨진 JSON 6개 검사. 운영 브라우저 로그인 재확인 대기.
