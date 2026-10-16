@@ -1,0 +1,83 @@
+{
+  "checked_at": "2026-10-16T00:55:28.477Z",
+  "database": "isolated in-memory SQLite with real Better Auth + Drizzle D1 adapter",
+  "count": 13,
+  "checks": [
+    "C94 signup two accounts with the same password",
+    "C98 duplicate email cannot create another account",
+    "C99 unknown email and wrong password have identical status and message",
+    "C95 login and HttpOnly Secure SameSite cookie; no token in JSON",
+    "C101-C104 scrypt salted hashes differ and never contain the password",
+    "C97 anonymous direct list export detail mutation and account return 401",
+    "new accounts have empty separate diaries; each can create a plan/task/record/subtask",
+    "C117-C122 bidirectional foreign read update delete rejected with 404 and no changes",
+    "C123-C125 URL header body owner spoofing cannot change the acting account or mix lists",
+    "same-origin CSRF rejection and unknown auth routes are closed",
+    "C96 C109-C110 logout invalidates the exact captured old cookie",
+    "C111 expired session is rejected",
+    "C100 scoped atomic import preserves values and links, retains mapping, retries cannot duplicate"
+  ],
+  "evidence": [
+    {
+      "case": "C99",
+      "method": "POST",
+      "path": "/api/auth/sign-in/email",
+      "requests": [
+        {
+          "email": "account-a@example.test",
+          "password": "[MASKED]"
+        },
+        {
+          "email": "missing@example.test",
+          "password": "[MASKED]"
+        }
+      ],
+      "status": 401,
+      "response": {
+        "error": "이메일 또는 비밀번호를 확인해 주세요."
+      }
+    },
+    {
+      "case": "C103-C104",
+      "algorithm": "scrypt",
+      "storedShape": "salt:derivedKey",
+      "hashesDiffer": true,
+      "password": "[MASKED]",
+      "storedHashes": "[MASKED: full password hashes not published]"
+    },
+    {
+      "case": "bidirectional ownership",
+      "requests": [
+        "GET /api/diary?type=tasks&id=[OTHER_TASK]",
+        "POST /api/diary {action:updateTask,id:[OTHER_TASK]}",
+        "POST /api/diary {action:deleteTask,id:[OTHER_TASK]}"
+      ],
+      "accountDirections": [
+        "A→B",
+        "B→A"
+      ],
+      "cookie": "[MASKED]",
+      "statuses": [
+        404,
+        404,
+        404
+      ],
+      "beforeAfterUnchanged": true
+    },
+    {
+      "case": "logout replay",
+      "method": "GET",
+      "path": "/api/diary",
+      "cookieBefore": "[MASKED: same captured cookie]",
+      "cookieAfter": "[MASKED: same captured cookie]",
+      "beforeStatus": 200,
+      "afterStatus": 401,
+      "onlyChange": "server sign-out completed"
+    }
+  ],
+  "limitations": [
+    "Production user signup and T06 import must be completed by the user.",
+    "Browser QA and hosted D1 are separate checks.",
+    "Synthetic test accounts/data were never deployed."
+  ]
+}

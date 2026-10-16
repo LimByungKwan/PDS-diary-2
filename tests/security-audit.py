@@ -38,9 +38,9 @@ build_files=0
 if (root/'dist').exists():
  for p in sorted((root/'dist').rglob('*')):
   if p.is_file():scan('deploy/'+str(p.relative_to(root/'dist')),p.read_bytes());build_files+=1
-page=(root/'app/page.tsx').read_text()
-notice='지금은 로그인이 없어 링크를 아는 사람은 누구나 볼 수 있습니다. 남이 봐도 괜찮은 내용만 넣으세요'
-report={'scope':'tracked working source, reachable Git blobs and commit messages, current dist build','source_files':source_files,'history_blobs':history_blobs,'build_files':build_files,'secret_patterns':list(patterns),'findings':hits,'public_notice_exact':notice in page,'unsafe_html_output_in_diary':any(x in page for x in ['dangerouslySetInnerHTML','innerHTML','eval(']),'storage':'server D1; GET/export returns diary tables only','pending':['Actual browser Network/Console inspection','Browser script-text execution check','Incognito result and public GitHub fixed-commit URLs']}
+page=(root/'components/diary.tsx').read_text()+(root/'app/login/page.tsx').read_text()
+notice='로그인 전에는 기록을 표시하지 않습니다.'
+report={'scope':'tracked working source, reachable Git blobs and commit messages, current dist build','source_files':source_files,'history_blobs':history_blobs,'build_files':build_files,'secret_patterns':list(patterns),'findings':hits,'protected_notice_present':notice in page,'unsafe_html_output_in_diary':any(x in page for x in ['dangerouslySetInnerHTML','innerHTML','eval(']),'storage':'server D1; GET/export requires a live session and filters by owner; no auth tables exported','pending':['Actual browser signup login logout and import by the user','Hosted HTTP checks after deployment','T07 public GitHub source upload']}
 out=root/'tests/security-results.json';out.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
 print(json.dumps({k:v for k,v in report.items() if k not in ['secret_patterns']},ensure_ascii=False))
-raise SystemExit(1 if hits or not report['public_notice_exact'] or report['unsafe_html_output_in_diary'] else 0)
+raise SystemExit(1 if hits or not report['protected_notice_present'] or report['unsafe_html_output_in_diary'] else 0)
