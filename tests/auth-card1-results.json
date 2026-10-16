@@ -1,7 +1,7 @@
 {
-  "checked_at": "2026-10-16T00:55:28.477Z",
+  "checked_at": "2026-10-16T01:43:28.488Z",
   "database": "isolated in-memory SQLite with real Better Auth + Drizzle D1 adapter",
-  "count": 13,
+  "count": 14,
   "checks": [
     "C94 signup two accounts with the same password",
     "C98 duplicate email cannot create another account",
@@ -13,6 +13,7 @@
     "C117-C122 bidirectional foreign read update delete rejected with 404 and no changes",
     "C123-C125 URL header body owner spoofing cannot change the acting account or mix lists",
     "same-origin CSRF rejection and unknown auth routes are closed",
+    "study routes require a session and ignore a spoofed owner",
     "C96 C109-C110 logout invalidates the exact captured old cookie",
     "C111 expired session is rejected",
     "C100 scoped atomic import preserves values and links, retains mapping, retries cannot duplicate"
