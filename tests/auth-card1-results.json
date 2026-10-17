@@ -1,7 +1,7 @@
 {
-  "checked_at": "2026-10-16T03:26:58.434Z",
+  "checked_at": "2026-10-17T06:55:39.853Z",
   "database": "isolated in-memory SQLite with real Better Auth + Drizzle D1 adapter",
-  "count": 14,
+  "count": 15,
   "checks": [
     "C94 signup two accounts with the same password",
     "C98 duplicate email cannot create another account",
@@ -16,7 +16,8 @@
     "study routes require a session and ignore a spoofed owner",
     "C96 C109-C110 logout invalidates the exact captured old cookie",
     "C111 expired session is rejected",
-    "C100 scoped atomic import preserves values and links, retains mapping, retries cannot duplicate"
+    "C100 scoped atomic import preserves values and links, retains mapping, retries cannot duplicate",
+    "C114 password change rejects wrong current password and revokes all old sessions"
   ],
   "evidence": [
     {
@@ -74,6 +75,20 @@
       "beforeStatus": 200,
       "afterStatus": 401,
       "onlyChange": "server sign-out completed"
+    },
+    {
+      "case": "password change replay",
+      "scope": "isolated test DB",
+      "method": "GET",
+      "path": "/api/account",
+      "cookieBefore": "[MASKED: same old cookie]",
+      "cookieAfter": "[MASKED: same old cookie]",
+      "beforeStatus": 200,
+      "afterStatus": 401,
+      "secondOldSessionStatus": 401,
+      "oldPasswordLoginStatus": 401,
+      "newPasswordLoginStatus": 200,
+      "wrongCurrentPasswordLeavesSessionsAndHashUnchanged": true
     }
   ],
   "limitations": [

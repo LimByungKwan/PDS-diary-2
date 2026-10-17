@@ -1,8 +1,8 @@
 {
   "scope": "tracked working source, reachable Git blobs and commit messages, current dist build",
-  "source_files": 151,
-  "history_blobs": 141,
-  "build_files": 96,
+  "source_files": 170,
+  "history_blobs": 209,
+  "build_files": 112,
   "secret_patterns": [
     "openai_key",
     "github_key",

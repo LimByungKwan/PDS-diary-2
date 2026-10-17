@@ -58,6 +58,26 @@ await check('C96 C109-C110 logout invalidates the exact captured old cookie',asy
 await check('C111 expired session is rejected',async()=>{sqlite.prepare('UPDATE auth_sessions SET expires_at=? WHERE user_id=?').run(Date.now()-1000,ub);assert.equal((await get(cb)).status,401)});
 // T06 import test uses a separate new account and synthetic historical fixture.
 await check('C100 scoped atomic import preserves values and links, retains mapping, retries cannot duplicate',async()=>{const email='account-c@example.test';assert.equal((await authRequest('sign-up/email',{email,password,name:'C'})).status,200);const login=await authRequest('sign-in/email',{email,password});const cc=cookieFrom(login);const backup={schema_version:2,timezone:'Asia/Seoul',time_unit:'minutes',exported_at:new Date().toISOString(),plans:[{id:'p',title:'T06 fixture',start_date:'2026-10-01',end_date:'2026-10-02',priority:2,success:'original',estimated_minutes:30,version:1,created_at:'2026-10-01T00:00:00Z',source_review_id:null,deleted_at:null}],plan_revisions:[{id:'v',plan_id:'p',version:1,snapshot:JSON.stringify({id:'p',title:'T06 fixture'}),created_at:'2026-10-01T00:00:00Z'}],tasks:[{id:'t',plan_id:'p',title:'task',description:'<script>test text</script>',due_date:'2026-10-01',priority:2,tags:'test',estimated_minutes:30,status:'completed',cycle:1,deleted_at:null,created_at:'2026-10-01T00:00:00Z',task_kind:'task',start_date:null,scheduled_time:null}],execution_records:[{id:'r',task_id:'t',started_at:'2026-10-01T00:00:00Z',ended_at:'2026-10-01T00:30:00Z',actual_minutes:30,blocked_reason:'',note:'synthetic',request_key:'k',created_at:'2026-10-01T00:30:00Z'}],completion_events:[],reviews:[],subtasks:[]};const r=await imports.POST(request('/api/diary/import',cc,backup));assert.equal(r.status,200,await r.clone().text());const x=(await get(cc)).body;assert.equal(x.plans[0].title,backup.plans[0].title);assert.equal(x.tasks[0].plan_id,x.plans[0].id);assert.equal(x.execution_records[0].task_id,x.tasks[0].id);assert.equal(x.execution_records[0].actual_minutes,30);assert.notEqual(x.tasks[0].id,'t');assert.ok((await get(cc,'/api/diary?export=1')).body.imports[0].counts.includes('id_map'));assert.equal((await imports.POST(request('/api/diary/import',cc,backup))).status,400);assert.equal((await get(cc)).body.tasks.length,1)});
+await check('C114 password change rejects wrong current password and revokes all old sessions',async()=>{
+  const email='account-c@example.test';
+  const login=async(pw)=>authRequest('sign-in/email',{email,password:pw});
+  const first=cookieFrom(await login(password)),second=cookieFrom(await login(password));
+  const read=cookie=>account.GET(request('/api/account',cookie));
+  assert.equal((await read(first)).status,200);assert.equal((await read(second)).status,200);
+  const before=sqlite.prepare('SELECT password FROM auth_accounts WHERE user_id=(SELECT id FROM auth_users WHERE email=?)').get(email).password;
+  const next=randomBytes(24).toString('base64url');
+  const bad=await authRequest('change-password',{currentPassword:password+'wrong',newPassword:next,revokeOtherSessions:true},first);
+  assert.notEqual(bad.status,200);
+  assert.equal(sqlite.prepare('SELECT password FROM auth_accounts WHERE user_id=(SELECT id FROM auth_users WHERE email=?)').get(email).password,before);
+  assert.equal((await read(first)).status,200);assert.equal((await read(second)).status,200);
+  const changed=await authRequest('change-password',{currentPassword:password,newPassword:next,revokeOtherSessions:true},first);
+  assert.equal(changed.status,200);assert.deepEqual(await changed.json(),{ok:true});
+  assert.equal((await read(first)).status,401);assert.equal((await read(second)).status,401);
+  assert.equal((await login(password)).status,401);
+  const fresh=await login(next);assert.equal(fresh.status,200);assert.equal((await read(cookieFrom(fresh))).status,200);
+  const anonymous=await authRequest('change-password',{currentPassword:next,newPassword:password,revokeOtherSessions:true});assert.equal(anonymous.status,401);
+  evidence.push({case:'password change replay',scope:'isolated test DB',method:'GET',path:'/api/account',cookieBefore:'[MASKED: same old cookie]',cookieAfter:'[MASKED: same old cookie]',beforeStatus:200,afterStatus:401,secondOldSessionStatus:401,oldPasswordLoginStatus:401,newPasswordLoginStatus:200,wrongCurrentPasswordLeavesSessionsAndHashUnchanged:true});
+});
 assert.equal(JSON.stringify(evidence).includes(password),false);assert.equal(JSON.stringify(evidence).includes(ca),false);
 writeFileSync('tests/auth-card1-results.json',JSON.stringify({checked_at:new Date().toISOString(),database:'isolated in-memory SQLite with real Better Auth + Drizzle D1 adapter',count:checks.length,checks,evidence,limitations:['Production user signup and T06 import must be completed by the user.','Browser QA and hosted D1 are separate checks.','Synthetic test accounts/data were never deployed.']},null,2)+'\n');
 console.log(checks.length+' authentication and ownership checks passed; secrets were masked.');
