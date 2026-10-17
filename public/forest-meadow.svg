@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" fill="none">
+<defs>
+ <linearGradient id="sky" x2="0" y2="1000" gradientUnits="userSpaceOnUse"><stop stop-color="#cdded8"/><stop offset=".42" stop-color="#e8e9d6"/><stop offset="1" stop-color="#9ab99b"/></linearGradient>
+ <radialGradient id="sun"><stop stop-color="#fff9df" stop-opacity=".95"/><stop offset="1" stop-color="#fff9df" stop-opacity="0"/></radialGradient>
+ <linearGradient id="field" x2="0" y2="1000" gradientUnits="userSpaceOnUse"><stop stop-color="#d4deb4"/><stop offset="1" stop-color="#83a78a"/></linearGradient>
+ <linearGradient id="mist" x2="0" y2="1"><stop stop-color="#f4f3df" stop-opacity="0"/><stop offset=".5" stop-color="#f4f3df" stop-opacity=".7"/><stop offset="1" stop-color="#f4f3df" stop-opacity="0"/></linearGradient>
+ <g id="pine"><path d="M0 0  -34 66 -20 62 -49 105 -29 100 -66 155 -15 146 -15 175 15 175 15 146 66 155 29 100 49 105 20 62 34 66Z" fill="currentColor"/></g>
+</defs>
+<path fill="url(#sky)" d="M0 0h1600v1000H0z"/>
+<ellipse cx="1030" cy="250" rx="470" ry="360" fill="url(#sun)"/>
+<circle cx="1030" cy="250" r="56" fill="#fff8db" opacity=".55"/>
+<path d="M0 495Q180 330 390 455T790 405T1200 390T1600 410V1000H0Z" fill="#a8bfb0" opacity=".58"/>
+<path d="M0 560Q220 400 470 520T950 465T1600 480V1000H0Z" fill="#8eaf9c" opacity=".48"/>
+<g color="#6d9985" opacity=".42"><use href="#pine" transform="translate(55 375) scale(1.5)"/><use href="#pine" transform="translate(150 340) scale(1.8)"/><use href="#pine" transform="translate(270 400) scale(1.5)"/><use href="#pine" transform="translate(370 430) scale(1.1)"/><use href="#pine" transform="translate(1295 380) scale(1.6)"/><use href="#pine" transform="translate(1430 335) scale(2)"/><use href="#pine" transform="translate(1550 365) scale(1.8)"/></g>
+<path d="M0 665Q255 510 560 605T1110 555T1600 590V1000H0Z" fill="#b8cba4"/>
+<path d="M0 755Q350 605 685 695T1280 665T1600 655V1000H0Z" fill="url(#field)"/>
+<path d="M900 616Q760 700 910 776T1150 1000H975Q980 867 832 800T900 616" fill="#ecebd2" opacity=".48"/>
+<g color="#537f69" opacity=".62"><use href="#pine" transform="translate(-15 400) scale(3.2)"/><use href="#pine" transform="translate(112 470) scale(2.7)"/><use href="#pine" transform="translate(245 555) scale(1.9)"/><use href="#pine" transform="translate(1570 390) scale(3.1)"/><use href="#pine" transform="translate(1420 480) scale(2.5)"/><use href="#pine" transform="translate(1300 550) scale(1.8)"/></g>
+<ellipse cx="760" cy="600" rx="960" ry="140" fill="url(#sun)" opacity=".55"/>
+<path fill="url(#mist)" d="M0 485h1600v210H0z"/>
+<path d="M0 930Q260 775 540 877T1050 886T1600 820V1000H0Z" fill="#648f77" opacity=".44"/>
+<g fill="#f5f2cf" opacity=".78"><circle cx="335" cy="800" r="3"/><circle cx="530" cy="735" r="2"/><circle cx="1210" cy="750" r="3"/><circle cx="1130" cy="820" r="2"/><circle cx="400" cy="902" r="3"/><circle cx="685" cy="880" r="2"/><circle cx="1350" cy="893" r="3"/></g>
+</svg>
