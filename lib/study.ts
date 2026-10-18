@@ -18,6 +18,20 @@ export async function mutateStudy(db:D1Database,userId:string,b:any,at=new Date(
   const baselineRule=text(b.baseline_rule,500);
   await db.prepare('INSERT INTO study_experiments (id,user_id,start_date,protocol,created_at) VALUES (?,?,?,?,?)').bind(crypto.randomUUID(),userId,today,JSON.stringify({...studyProtocol,baselineRule}),now).run();return;
  }
+ if(b.action==='restart'){
+  if(!e||b.experiment_id!==e.id)throw new Error('관찰 상태가 바뀌었습니다. 새로고침 후 확인해 주세요.');
+  if(e.start_date>=today||state.days.some((d:any)=>d.closed_at)||state.change)throw new Error('이전 날짜에 시작했고 확정 결과가 없는 관찰만 다시 시작할 수 있습니다.');
+  if(b.confirm!==true)throw new Error('이전 관찰 이력 보존을 확인해 주세요.');
+  const reason=text(b.reason,500),baselineRule=text(b.baseline_rule,500),old=JSON.parse(e.protocol);
+  const {previousAttempts=[],...oldProtocol}=old;
+  const archived={id:e.id,start_date:e.start_date,protocol:oldProtocol,created_at:e.created_at,days:state.days,change:state.change,archived_at:now,reason};
+  const protocol=JSON.stringify({...studyProtocol,baselineRule,previousAttempts:[...previousAttempts,archived]});
+  const result=await db.batch([
+   db.prepare('DELETE FROM study_days WHERE experiment_id=? AND NOT EXISTS (SELECT 1 FROM study_days WHERE experiment_id=? AND closed_at IS NOT NULL)').bind(e.id,e.id),
+   db.prepare('UPDATE study_experiments SET id=?,start_date=?,protocol=?,created_at=? WHERE id=? AND user_id=? AND NOT EXISTS (SELECT 1 FROM study_days WHERE experiment_id=? AND closed_at IS NOT NULL)').bind(crypto.randomUUID(),today,protocol,now,e.id,userId,e.id)
+  ]);
+  if(!result[1].meta.changes)throw new Error('관찰 상태가 바뀌었습니다. 새로고침 후 확인해 주세요.');return;
+ }
  if(!e)throw new Error('시작 기준을 먼저 저장해 주세요.');
  const day=(Date.parse(today+'T00:00:00Z')-Date.parse(e.start_date+'T00:00:00Z'))/86400000+1;
  if(day<1||day>5)throw new Error('5일 관찰 기간에만 기록할 수 있습니다.');
