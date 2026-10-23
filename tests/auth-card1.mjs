@@ -20,7 +20,7 @@ const d1={prepare(sql){return new Statement(sql)},async batch(list){sqlite.exec(
 globalThis.__env={DB:d1,BETTER_AUTH_URL:'https://diary.test',BETTER_AUTH_SECRET:randomBytes(48).toString('base64url')};
 const files={
   'db/schema.ts':'schema.mjs','lib/auth-core.ts':'auth-core.mjs','lib/auth.ts':'auth.mjs','lib/ownership.ts':'ownership.mjs','lib/domain.ts':'domain.mjs','lib/study.ts':'study.mjs','lib/export.ts':'export.mjs','lib/import-diary.ts':'import-diary.mjs',
-  'app/api/auth/[...all]/route.ts':'auth-route.mjs','app/api/account/route.ts':'account-route.mjs','app/api/study/route.ts':'study-route.mjs','app/api/diary/route.ts':'diary-route.mjs','app/api/diary/import/route.ts':'import-route.mjs',
+  'app/api/auth/[...all]/route.ts':'auth-route.mjs','app/api/account/delete/route.ts':'delete-account-route.mjs','app/api/account/route.ts':'account-route.mjs','app/api/study/route.ts':'study-route.mjs','app/api/diary/route.ts':'diary-route.mjs','app/api/diary/import/route.ts':'import-route.mjs',
 };
 for(const [source,dest] of Object.entries(files)){
   let text=readFileSync(source,'utf8').replace(/import \{ env \} from ['"]cloudflare:workers['"];?/g,'const env=globalThis.__env;');
@@ -77,6 +77,53 @@ await check('C114 password change rejects wrong current password and revokes all
   const fresh=await login(next);assert.equal(fresh.status,200);assert.equal((await read(cookieFrom(fresh))).status,200);
   const anonymous=await authRequest('change-password',{currentPassword:next,newPassword:password,revokeOtherSessions:true});assert.equal(anonymous.status,401);
   evidence.push({case:'password change replay',scope:'isolated test DB',method:'GET',path:'/api/account',cookieBefore:'[MASKED: same old cookie]',cookieAfter:'[MASKED: same old cookie]',beforeStatus:200,afterStatus:401,secondOldSessionStatus:401,oldPasswordLoginStatus:401,newPasswordLoginStatus:200,wrongCurrentPasswordLeavesSessionsAndHashUnchanged:true});
+});
+await check('C134 deletion requires password and confirmation; atomically removes only own data and revokes all sessions',async()=>{
+ const deletion=await import(join(temp,'delete-account-route.mjs'));
+ const email='account-c@example.test',freshPassword=randomBytes(24).toString('base64url');
+ // A separate disposable account with every child relation, an import, and study references.
+ await authRequest('sign-up/email',{email:'delete-only@example.test',password:freshPassword,name:'Deletion fixture'});
+ const cookie=cookieFrom(await authRequest('sign-in/email',{email:'delete-only@example.test',password:freshPassword}));
+ const second=cookieFrom(await authRequest('sign-in/email',{email:'delete-only@example.test',password:freshPassword}));
+ const uid=sqlite.prepare('SELECT id FROM auth_users WHERE email=?').get('delete-only@example.test').id;
+ await post(cookie,{action:'createPlan',title:'delete fixture',start_date:'2026-10-01',end_date:'2026-10-31',priority:2,success:'test',estimated_minutes:30});
+ const p=(await get(cookie)).body.plans[0];
+ await post(cookie,{action:'createTask',plan_id:p.id,title:'delete task',due_date:'2026-10-15',priority:2,tags:'',estimated_minutes:30});
+ const t=(await get(cookie)).body.tasks[0];
+ await post(cookie,{action:'record',task_id:t.id,started_at:'2026-10-15T00:00:00Z',ended_at:'2026-10-15T00:30:00Z',request_key:'delete-record',blocked_reason:'',note:'fixture'});
+ assert.equal((await post(cookie,{action:'complete',id:t.id,cycle:1,request_key:'delete-complete'})).status,200);
+ await post(cookie,{action:'createSubtasks',task_id:t.id,titles:['child']});
+ await post(cookie,{action:'review',plan_id:p.id,start_date:'2026-10-01',end_date:'2026-10-31',improvement:'fixture'});
+ sqlite.prepare("INSERT INTO diary_imports VALUES ('delete-import',?,?,?,?,'2026-10-01T00:00:00Z')").run(uid,'test','2026-10-01T00:00:00Z','{}');
+ sqlite.prepare("INSERT INTO study_experiments VALUES ('delete-exp',?,'2026-10-01','{}','2026-10-01T00:00:00Z')").run(uid);
+ for(const n of [1,2])sqlite.prepare("INSERT INTO study_days (id,experiment_id,day_number,date,task_id,expected_minutes,opened_at) VALUES (?,'delete-exp',?,?,?,30,'2026-10-01T00:00:00Z')").run('delete-day-'+n,n,'2026-10-0'+n,t.id);
+ sqlite.prepare("INSERT INTO study_rule_changes VALUES ('delete-rule','delete-exp','rule','reason','delete-day-1','delete-day-2','2026-10-02T00:00:00Z')").run();
+ const otherBefore=JSON.stringify(sqlite.prepare('SELECT * FROM plans WHERE owner_user_id!=?').all(uid));
+ const call=(cookie,body)=>deletion.POST(request('/api/account/delete',cookie,body));
+ assert.equal((await call('',{password:freshPassword,confirmation:'계정 삭제'})).status,401);
+ assert.equal((await deletion.POST(new Request('https://diary.test/api/account/delete',{method:'POST',headers:{cookie,origin:'https://other.test','content-type':'application/json'},body:'{}'}))).status,403);
+ assert.equal((await call(cookie,{password:freshPassword,confirmation:'wrong'})).status,400);
+ assert.equal((await call(cookie,{password:'wrong',confirmation:'계정 삭제'})).status,400);
+ assert.equal((await get(cookie)).status,200);assert.ok(sqlite.prepare('SELECT id FROM auth_users WHERE id=?').get(uid));
+ sqlite.prepare('UPDATE auth_rate_limits SET count=5,last_request=? WHERE key=?').run(Date.now(),'account-delete:'+uid);
+ assert.equal((await call(cookie,{password:freshPassword,confirmation:'계정 삭제'})).status,429);assert.equal((await get(cookie)).status,200);
+ sqlite.prepare('DELETE FROM auth_rate_limits WHERE key=?').run('account-delete:'+uid);
+ const tableNames=['plans','plan_revisions','tasks','execution_records','completion_events','reviews','subtasks','diary_imports','study_experiments','study_days','study_rule_changes','auth_users','auth_accounts','auth_sessions'];
+ const before=Object.fromEntries(tableNames.map(name=>[name,sqlite.prepare('SELECT count(*) n FROM '+name).get().n]));
+ sqlite.exec("CREATE TRIGGER deletion_failure BEFORE DELETE ON auth_users WHEN OLD.email='delete-only@example.test' BEGIN SELECT RAISE(ABORT,'forced isolated test failure'); END");
+ assert.equal((await call(cookie,{password:freshPassword,confirmation:'계정 삭제'})).status,503);
+ const rolledBack=Object.fromEntries(tableNames.map(name=>[name,sqlite.prepare('SELECT count(*) n FROM '+name).get().n]));
+ assert.deepEqual(rolledBack,before);assert.equal((await get(cookie)).status,200);
+ sqlite.exec('DROP TRIGGER deletion_failure');
+ const r=await call(cookie,{password:freshPassword,confirmation:'계정 삭제',user_id:ub,owner_user_id:ub});
+ assert.equal(r.status,200,await r.clone().text());assert.deepEqual(await r.json(),{ok:true});
+ assert.equal((await get(cookie)).status,401);assert.equal((await get(second)).status,401);
+ assert.equal((await authRequest('sign-in/email',{email:'delete-only@example.test',password:freshPassword})).status,401);
+ const after=Object.fromEntries(tableNames.map(name=>[name,sqlite.prepare('SELECT count(*) n FROM '+name).get().n]));
+ for(const table of tableNames)assert.ok(after[table]<before[table],table+' fixture must be removed');
+ assert.equal(JSON.stringify(sqlite.prepare('SELECT * FROM plans WHERE owner_user_id!=?').all(uid)),otherBefore);
+ assert.ok(sqlite.prepare('SELECT id FROM auth_users WHERE id=?').get(ub));
+ evidence.push({case:'C134',scope:'disposable isolated account',path:'/api/account/delete',method:'POST',password:'[MASKED]',wrongPasswordStatus:400,missingConfirmationStatus:400,anonymousStatus:401,crossOriginStatus:403,successStatus:200,oldSessionStatuses:[401,401],deletedAccountLoginStatus:401,allOwnedTablesRemoved:true,otherOwnerUnchanged:true,failedBatchRollsBack:true,rateLimitStatus:429});
 });
 assert.equal(JSON.stringify(evidence).includes(password),false);assert.equal(JSON.stringify(evidence).includes(ca),false);
 writeFileSync('tests/auth-card1-results.json',JSON.stringify({checked_at:new Date().toISOString(),database:'isolated in-memory SQLite with real Better Auth + Drizzle D1 adapter',count:checks.length,checks,evidence,limitations:['Production user signup and T06 import must be completed by the user.','Browser QA and hosted D1 are separate checks.','Synthetic test accounts/data were never deployed.']},null,2)+'\n');

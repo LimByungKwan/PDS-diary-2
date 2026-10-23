@@ -1,7 +1,7 @@
 {
-  "checked_at": "2026-10-18T03:58:25.174Z",
+  "checked_at": "2026-10-23T00:29:08.572Z",
   "database": "isolated in-memory SQLite with real Better Auth + Drizzle D1 adapter",
-  "count": 15,
+  "count": 16,
   "checks": [
     "C94 signup two accounts with the same password",
     "C98 duplicate email cannot create another account",
@@ -17,7 +17,8 @@
     "C96 C109-C110 logout invalidates the exact captured old cookie",
     "C111 expired session is rejected",
     "C100 scoped atomic import preserves values and links, retains mapping, retries cannot duplicate",
-    "C114 password change rejects wrong current password and revokes all old sessions"
+    "C114 password change rejects wrong current password and revokes all old sessions",
+    "C134 deletion requires password and confirmation; atomically removes only own data and revokes all sessions"
   ],
   "evidence": [
     {
@@ -89,6 +90,27 @@
       "oldPasswordLoginStatus": 401,
       "newPasswordLoginStatus": 200,
       "wrongCurrentPasswordLeavesSessionsAndHashUnchanged": true
+    },
+    {
+      "case": "C134",
+      "scope": "disposable isolated account",
+      "path": "/api/account/delete",
+      "method": "POST",
+      "password": "[MASKED]",
+      "wrongPasswordStatus": 400,
+      "missingConfirmationStatus": 400,
+      "anonymousStatus": 401,
+      "crossOriginStatus": 403,
+      "successStatus": 200,
+      "oldSessionStatuses": [
+        401,
+        401
+      ],
+      "deletedAccountLoginStatus": 401,
+      "allOwnedTablesRemoved": true,
+      "otherOwnerUnchanged": true,
+      "failedBatchRollsBack": true,
+      "rateLimitStatus": 429
     }
   ],
   "limitations": [

@@ -1,7 +1,13 @@
 {
   "extends": "pds-schema-v2.json",
   "baseline_commit": "bbb70bb7d07e5c0e548d4c2f4436a991429f98d3",
-  "auth_tables": ["auth_users", "auth_accounts", "auth_sessions", "auth_verifications", "auth_rate_limits"],
+  "auth_tables": [
+    "auth_users",
+    "auth_accounts",
+    "auth_sessions",
+    "auth_verifications",
+    "auth_rate_limits"
+  ],
   "ownership": "plans.owner_user_id -> auth_users.id; all child access derives from that owner; acting user comes only from validated server session",
   "migration_audit": "diary_imports.user_id UNIQUE; original source IDs mapped per account; dates/values/minutes preserved",
   "study_tables": {
@@ -10,5 +16,6 @@
     "study_rule_changes": "id PK, experiment_id UNIQUE FK ON DELETE CASCADE, rule, reason, day_one_id and day_two_id FK study_days, changed_at UTC ISO"
   },
   "time_rules": "auth timestamps are epoch milliseconds; diary/study timestamps are UTC ISO; study dates use Asia/Seoul; Monday starts week",
-  "study_metric": "absolute(actual_minutes - expected_minutes) in minutes per closed day; missing days excluded, explicit no-study is zero; sum unrounded values, mean over closed days; display rounded to one decimal"
+  "study_metric": "absolute(actual_minutes - expected_minutes) in minutes per closed day; missing days excluded, explicit no-study is zero; sum unrounded values, mean over closed days; display rounded to one decimal",
+  "account_deletion": "Authenticated POST /api/account/delete requires same origin, current password (Better Auth scrypt verifier), literal confirmation, per-account rate limit; atomic D1 batch deletes own diary children, study rule changes/days/experiment (including archived attempts), imports, sessions, accounts, user; downloaded exports and separate T06 public copy unaffected."
 }
