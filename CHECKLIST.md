@@ -27,7 +27,7 @@
 | C40 | 작성 완료 | SUBMISSION.md 확인 방법 4줄·AI와 판단 3줄 |
 | C46 | 최종 공개물 확인 필요 | 원문 없는 문서 작성·패턴 검사; 최종 공개 소스/첨부 별도 점검 |
 | C77 | 확인 | AUTH_IMPLEMENTATION.md 기준 기준 원본 고정 commit; 실제 가져오기 source_commit 일치 |
-| C78 | 로컬 확인·공개 업로드 후 확인 필요 | 기준 T06가 현재 Git HEAD의 조상; GitHub 최종 이력 별도 확인 |
+| C78 | 로컬 확인·공개 업로드 후 확인 필요 | 기준 기준 원본가 현재 Git HEAD의 조상; GitHub 최종 이력 별도 확인 |
 | C91 | 확인 | AUTH_IMPLEMENTATION.md ①②; package.json/pnpm-lock.yaml |
 | C92 | 확인 | AUTH_IMPLEMENTATION.md ①②; package.json/pnpm-lock.yaml |
 | C93 | 확인 | AUTH_IMPLEMENTATION.md ①②; package.json/pnpm-lock.yaml |

@@ -1,6 +1,6 @@
 # 플랜두씨 · 인증을 붙인 나만의 다이어리
 
-T06의 Plan → Do → See 앱에 가입·로그인·서버 세션·계정별 자료 보호를 붙인 프로젝트입니다. 로그인 후 자신의 계획·할 일·실행·돌아보기와 5일 공부 시간 예측 관찰을 사용합니다.
+기존 Plan → Do → See 앱에 가입·로그인·서버 세션·계정별 자료 보호를 붙인 프로젝트입니다. 로그인 후 자신의 계획·할 일·실행·돌아보기와 5일 공부 시간 예측 관찰을 사용합니다.
 
 - 결과물: https://byungkwan-pds-diary-2.quannie70.chatgpt.site
 - 소스 저장소: https://github.com/LimByungKwan/PDS-diary-2
@@ -41,4 +41,4 @@ python3 tests/security-audit.py
 
 D1 바인딩은 DB입니다. BETTER_AUTH_URL·BETTER_AUTH_SECRET은 서버 런타임 환경 변수로 설정합니다. 비밀키를 브라우저 코드나 Git에 넣지 않습니다. GitHub Pages는 이 서버 앱의 실행 환경이 아닙니다. 현재 앱 이력은 기준 기준 원본 commit을 조상으로 보존합니다. 소스 업로드 때 Git 이력을 새로 초기화하지 않습니다.
 
-기준 원본 문서는 ORIGINAL_README.md·ORIGINAL_SUBMISSION.md에 보존했습니다. T07에서 보호하는 자료와 별도 기준 원본 공개본은 구분합니다.
+기준 원본 문서는 ORIGINAL_README.md·ORIGINAL_SUBMISSION.md에 보존했습니다. 현재 앱에서 보호하는 자료와 별도 기준 원본 공개본은 구분합니다.
