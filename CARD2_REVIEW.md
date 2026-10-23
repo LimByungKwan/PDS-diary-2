@@ -12,13 +12,13 @@ Better Auth 1.7.7의 기본 비밀번호 해시 방식인 **scrypt**를 사용�
 
 다음 값은 입력 비밀번호가 아닌, 실제 검증 계정에 저장된 **salt:derivedKey 형식의 해시**다. 본인 실사용 계정의 해시는 싣지 않는다. 검증 A는 2026-10-17 비밀번호 변경, 검증 B는 2026-10-23 계정 삭제를 완료해 아래 과거 저장값은 더 이상 로그인에 사용되지 않는다. 실사용 계정의 저장값은 공개하지 않는다.
 
-검증 A (`t07-test-a@example.test`):
+검증 A (`[검증 A 이메일]`):
 
 ```text
 47c65dc2eeb01d06a0dbc9dff59ce4b9:9f24582e21299e09f8b9e8cfeab24b16107e5f2e84e7a4d6d71392173fe16fcc2c7b556e8173f8de3ad1e2a11a4b7c708eaf6518871283b8ee1670e9b3e00ce8
 ```
 
-검증 B (`t07-test-b@example.test`):
+검증 B (`[검증 B 이메일]`):
 
 ```text
 de9c2730b5c66e967a1fb60b33693b8c:15cf0d47aba60740976ae81123605cfe7c5fccc698caaf44cfdbeab9b5d355758a51ddac228a7015d94e71f2568adf969075dcec27cfca75f36dfc5018624583
@@ -43,7 +43,7 @@ POST /api/auth/sign-in/email
 Content-Type: application/json
 Accept: application/json
 
-{"email":"t07-test-a@example.test","password":"[가림]"}
+{"email":"[검증 A 이메일]","password":"[가림]"}
 ```
 
 ```http
