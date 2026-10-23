@@ -39,12 +39,12 @@ Better Auth 1.7.7의 서버 DB 세션을 사용한다. lib/auth-core.ts에서 ex
 
 로그인 후 사이드바의 비밀번호 변경 → /account/password에서 현재 비밀번호·새 비밀번호·확인을 입력한다. app/account/password/page.tsx는 서버에서 로그인 여부를 확인하고 components/change-password.tsx는 POST /api/auth/change-password를 호출한다. 성공 후 새 비밀번호로 로그인할 수 있는 링크를 표시한다. 기존 변경 API는 성공하면 해당 사용자의 서버 세션을 모두 삭제한다.
 
-2026-10-17 node tests/auth-card1.mjs: 15개 묶음 통과. 추가 C114 검사는 틀린 현재 비밀번호로 변경 시 해시·기존 세션 유지, 정상 변경 후 기존 두 세션 각각 GET /api/account 200 → 401, 이전 비밀번호 로그인 401·새 비밀번호 로그인 200, 비로그인 변경 401을 확인한다. 격리 DB 검사이며 운영 사용자 비밀번호는 변경하지 않았다. 운영 화면 확인은 별도 진행한다.
+2026-10-17 node tests/auth-card1.mjs: 15개 묶음 통과. 추가 C114 검사는 틀린 현재 비밀번호로 변경 시 해시·기존 세션 유지, 정상 변경 후 기존 두 세션 각각 GET /api/account 200 → 401, 이전 비밀번호 로그인 401·새 비밀번호 로그인 200, 비로그인 변경 401을 확인한다. 격리 DB 검사이며 운영 사용자 비밀번호는 변경하지 않았다. 운영 화면 확인도 위 10/17 기록에 추가했다.
 
 ## C112·C113·C115: 주소와 비밀값
 
 관찰한 주소는 /api/account이며 URL에 세션 값을 붙이지 않는다. 서버는 요청 헤더로 세션을 확인한다. lib/auth.ts는 BETTER_AUTH_SECRET을 서버 런타임 env에서 읽는다. 이 문서에는 쿠키·토큰·비밀키 원문이 없다.
 
-2026-10-17 tests/security-audit.py 실행: 현재 소스 167개, 도달 가능한 Git blob 209개, 현재 dist 배포 산출물 105개 검사. 지정된 키 형식·리터럴 자격증명 패턴 탐지 0건, 검사 종료 코드 0. 결과: tests/security-results.json.
+2026-10-17 tests/security-audit.py 실행: 당시 현재 소스·도달 가능한 Git blob·dist 배포 산출물 검사. 지정된 키 형식·리터럴 자격증명 패턴 탐지 0건, 검사 종료 코드 0. 결과: tests/security-results.json.
 
 이것은 패턴 검사이며 실제 BETTER_AUTH_SECRET 원문과의 전수 바이트 대조는 아니다. 현재 dist는 로컬 배포 산출물이며 운영 서버 파일을 다운로드해 대조한 결과는 아니다. 최종 소스·최종 빌드·공개 GitHub 업로드 후 같은 검사를 다시 수행해야 한다. 최종 제출 캡처도 별도로 비밀값 가림을 확인한다.

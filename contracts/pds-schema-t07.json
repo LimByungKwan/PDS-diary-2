@@ -17,5 +17,6 @@
   },
   "time_rules": "auth timestamps are epoch milliseconds; diary/study timestamps are UTC ISO; study dates use Asia/Seoul; Monday starts week",
   "study_metric": "absolute(actual_minutes - expected_minutes) in minutes per closed day; missing days excluded, explicit no-study is zero; sum unrounded values, mean over closed days; display rounded to one decimal",
-  "account_deletion": "Authenticated POST /api/account/delete requires same origin, current password (Better Auth scrypt verifier), literal confirmation, per-account rate limit; atomic D1 batch deletes own diary children, study rule changes/days/experiment (including archived attempts), imports, sessions, accounts, user; downloaded exports and separate T06 public copy unaffected."
+  "account_deletion": "Authenticated POST /api/account/delete requires same origin, current password (Better Auth scrypt verifier), literal confirmation, per-account rate limit; atomic D1 batch deletes own diary children, study rule changes/days/experiment (including archived attempts), imports, sessions, accounts, user; downloaded exports and separate T06 public copy unaffected.",
+  "study_restart_archive": "Only an earlier incomplete experiment with no closed days and no rule change can restart today. Preserve old experiment/protocol/day timestamps and reason in protocol.previousAttempts; exclude it from active five-day totals; retain original diary records. Active protocol is then fixed."
 }

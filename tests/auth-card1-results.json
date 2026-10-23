@@ -114,7 +114,7 @@
     }
   ],
   "limitations": [
-    "Production user signup and T06 import must be completed by the user.",
+    "Production browser actions and the real five-day data are documented separately in the REVIEW files.",
     "Browser QA and hosted D1 are separate checks.",
     "Synthetic test accounts/data were never deployed."
   ]

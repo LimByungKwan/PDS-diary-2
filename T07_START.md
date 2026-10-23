@@ -1,3 +1,5 @@
+> 개발 시작 당시의 보존 기록입니다. 아래 당시 상태·예정 사항은 현재 상태가 아닙니다. 최종 결과는 README.md, AUTH_IMPLEMENTATION.md, STUDY_REVIEW.md를 확인합니다.
+
 # T07 시작 기록
 
 기록일: 2026-10-16 (Asia/Seoul)
