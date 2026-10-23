@@ -1,11 +1,11 @@
 # 현재 앱 통과 기준별 증거 대조
 
-2026-10-23 기준입니다. 확인 범위와 아직 남은 최종 공개 확인을 구분합니다. 채점자의 최종 판정을 대신하는 보장은 아닙니다.
+2026-10-23 공개 소스·익명 HTTP 접속·제출 첨부를 점검한 결과입니다. 운영 증거와 격리 검사를 구분하며, 채점자의 최종 판정을 대신하는 보장은 아닙니다.
 
 | 기준 | 상태 | 증거 |
 |---|---|---|
-| C01 | 기존 화면 확인·최종 URL 확인 필요 | 새 시크릿 창에서 최종 결과물 로그인 화면과 고정 소스 확인 |
-| C03 | 기존 화면 확인·최종 URL 확인 필요 | 새 시크릿 창에서 최종 결과물 로그인 화면과 고정 소스 확인 |
+| C01 | 익명 공개 접속 확인 | 인증 없는 GitHub 소스 fetch 성공, 결과물 / 요청은 /login으로 이동 후 HTTP 200. FINAL_REVIEW.md |
+| C03 | 익명 로그인 화면·자료 차단 확인 | /와 /diary는 /login으로 이동해 200, 비로그인 /api/diary는 401. FINAL_REVIEW.md |
 | C04 | 확인 | STUDY_REVIEW.md; 실제 5일·변경·직접 계산·내보내기·계정 삭제 |
 | C05 | 확인 | STUDY_REVIEW.md; 실제 5일·변경·직접 계산·내보내기·계정 삭제 |
 | C06 | 확인 | STUDY_REVIEW.md; 실제 5일·변경·직접 계산·내보내기·계정 삭제 |
@@ -25,9 +25,9 @@
 | C27 | 확인 | STUDY_REVIEW.md; 실제 5일·변경·직접 계산·내보내기·계정 삭제 |
 | C39 | 작성 완료 | SUBMISSION.md 확인 방법 4줄·AI와 판단 3줄 |
 | C40 | 작성 완료 | SUBMISSION.md 확인 방법 4줄·AI와 판단 3줄 |
-| C46 | 최종 공개물 확인 필요 | 원문 없는 문서 작성·패턴 검사; 최종 공개 소스/첨부 별도 점검 |
-| C77 | 확인 | AUTH_IMPLEMENTATION.md 기준 기준 원본 고정 commit; 실제 가져오기 source_commit 일치 |
-| C78 | 로컬 확인·공개 업로드 후 확인 필요 | 기준 기준 원본가 현재 Git HEAD의 조상; GitHub 최종 이력 별도 확인 |
+| C46 | 점검 범위 내 확인 | 공개 소스·Git 이력·배포 파일·제출 MD/JSON 및 선정 캡처 점검에서 비밀번호·토큰·비밀키 원문을 발견하지 않음. FINAL_REVIEW.md |
+| C77 | 확인 | AUTH_IMPLEMENTATION.md 기준 원본 고정 commit; 실제 가져오기 source_commit 일치 |
+| C78 | 공개 Git 이력 확인 | 공개 main을 fetch한 뒤 bbb70bb7d07e5c0e548d4c2f4436a991429f98d3의 조상 관계를 git merge-base --is-ancestor로 확인함. |
 | C91 | 확인 | AUTH_IMPLEMENTATION.md ①②; package.json/pnpm-lock.yaml |
 | C92 | 확인 | AUTH_IMPLEMENTATION.md ①②; package.json/pnpm-lock.yaml |
 | C93 | 확인 | AUTH_IMPLEMENTATION.md ①②; package.json/pnpm-lock.yaml |

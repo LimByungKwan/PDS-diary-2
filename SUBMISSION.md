@@ -5,7 +5,7 @@
 - 결과물: https://byungkwan-pds-diary-2.quannie70.chatgpt.site
 - 소스 저장소: https://github.com/LimByungKwan/PDS-diary-2
 - 이어 사용한 최종 기준 원본 소스: https://github.com/LimByungKwan/PDS-diary-1/tree/bbb70bb7d07e5c0e548d4c2f4436a991429f98d3
-- 최종 소스 제출 칸에는 업로드가 끝난 현재 앱의 40자리 전체 commit을 포함한 `/tree/전체commit` 주소를 사용합니다. 저장소 첫 화면 주소만으로 고정 소스 제출을 대신하지 않습니다. 최종 commit은 GitHub 업로드 뒤 확인하며 이 문서 자신의 commit을 본문에 하드코딩하지 않습니다.
+- 고정 소스는 저장소의 전체 40자리 commit을 포함한 HTTPS /tree/ 주소로 지정합니다. 본문에 자기 자신의 commit을 넣을 수 없으므로 제출 입력용 고정 URL은 별도 FORM.md에 제공합니다.
 
 ## 인증 구현 설명서
 

@@ -21,7 +21,8 @@ Better Auth 1.7.7·Drizzle 어댑터 1.7.7의 scrypt와 24시간 서버 DB 세�
 - [AUTH_IMPLEMENTATION.md](AUTH_IMPLEMENTATION.md): 인증 설명서 6항목입니다.
 - [CARD1_REVIEW.md](CARD1_REVIEW.md), [CARD2_REVIEW.md](CARD2_REVIEW.md), [CARD3_REVIEW.md](CARD3_REVIEW.md), [CARD4_REVIEW.md](CARD4_REVIEW.md): 인증·암호·세션·소유권의 상세 증거입니다.
 - [STUDY_REVIEW.md](STUDY_REVIEW.md): 실제 5일·규칙 변경·직접 계산·내보내기·계정 삭제 확인입니다.
-- [VERIFICATION.md](VERIFICATION.md): 현재 검증 범위와 제출 전 남은 확인입니다.
+- [FINAL_REVIEW.md](FINAL_REVIEW.md): 익명 공개 접속·원본 조상·비밀값 및 첨부 점검 결과입니다.
+- [VERIFICATION.md](VERIFICATION.md): 최종 검증 결과와 검사 범위입니다.
 
 사용자의 원본 전체 내보내기·실사용 비밀번호·세션 쿠키는 공개 소스에 포함하지 않습니다. 카드 2에 있는 옛 시험 계정 해시는 이미 비밀번호 변경 또는 계정 삭제로 무효화한 저장 형태의 증거입니다.
 
